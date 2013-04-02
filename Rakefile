@@ -1,3 +1,4 @@
+#!/usr/bin/env rake
 require 'bundler'
 include Rake::DSL
 Bundler::GemHelper.install_tasks

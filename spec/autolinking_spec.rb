@@ -488,8 +488,9 @@ describe Twitter::Autolink do
         context "with a username not followed by a /" do
           def original_text; 'http://example.com/@foobar'; end
 
-          it "should link url" do
-            @autolinked_text.should have_autolinked_url('http://example.com/@foobar')
+          it "should link small url and username" do
+            @autolinked_text.should have_autolinked_url('http://example.com/')
+            @autolinked_text.should link_to_screen_name('foobar')
           end
         end
 
@@ -675,11 +676,6 @@ describe Twitter::Autolink do
     it "should customize href by hashtag_url_block option" do
       linked = @linker.auto_link("#hashtag", :hashtag_url_block => lambda{|a| "dummy"})
       linked.should have_autolinked_url('dummy', '#hashtag')
-    end
-
-    it "should customize href by cashtag_url_block option" do
-      linked = @linker.auto_link("$CASH", :cashtag_url_block => lambda{|a| "dummy"})
-      linked.should have_autolinked_url('dummy', '$CASH')
     end
 
     it "should customize href by link_url_block option" do

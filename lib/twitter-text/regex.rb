@@ -2,7 +2,7 @@
 
 module Twitter
   # A collection of regular expressions for parsing Tweet text. The regular expression
-  # list is frozen at load time to ensure immutability. These regular expressions are
+  # list is frozen at load time to ensure immutability. These reular expressions are
   # used throughout the <tt>Twitter</tt> classes. Special care has been taken to make
   # sure these reular expressions work with Tweets in all languages.
   class Regex
@@ -81,14 +81,6 @@ module Twitter
           regex_range(0x0300, 0x036f),
           regex_range(0x1e00, 0x1eff)
     ].join('').freeze
-
-    RTL_CHARACTERS = [
-      regex_range(0x0600,0x06FF),
-      regex_range(0x0750,0x077F),
-      regex_range(0x0590,0x05FF),
-      regex_range(0xFE70,0xFEFF)
-    ].join('').freeze
-
 
     NON_LATIN_HASHTAG_CHARS = [
       # Cyrillic (Russian, Ukrainian, etc.)
@@ -194,8 +186,8 @@ module Twitter
         ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|
         gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|
         lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|
-        pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|
-        th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw)
+        pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|ss|st|su|sv|sy|sz|tc|td|tf|tg|th|
+        tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|za|zm|zw)
         (?=[^0-9a-z]|$)
       )
     }ix
@@ -220,7 +212,7 @@ module Twitter
 
     REGEXEN[:valid_port_number] = /[0-9]+/
 
-    REGEXEN[:valid_general_url_path_chars] = /[a-z0-9!\*';:=\+\,\.\$\/%#\[\]\-_~&|@#{LATIN_ACCENTS}]/io
+    REGEXEN[:valid_general_url_path_chars] = /[a-z0-9!\*';:=\+\,\.\$\/%#\[\]\-_~&|#{LATIN_ACCENTS}]/io
     # Allow URL paths to contain balanced parens
     #  1. Used in Wikipedia URLs like /Primer_(film)
     #  2. Used in IIS sessions like /S(dfd346)/
@@ -228,15 +220,16 @@ module Twitter
     # Valid end-of-path chracters (so /foo. does not gobble the period).
     #   1. Allow =&# for empty URL parameters and other URL-join artifacts
     REGEXEN[:valid_url_path_ending_chars] = /[a-z0-9=_#\/\+\-#{LATIN_ACCENTS}]|(?:#{REGEXEN[:valid_url_balanced_parens]})/io
+    # Allow @ in a url, but only in the middle. Catch things like http://example.com/@user/
     REGEXEN[:valid_url_path] = /(?:
       (?:
         #{REGEXEN[:valid_general_url_path_chars]}*
         (?:#{REGEXEN[:valid_url_balanced_parens]} #{REGEXEN[:valid_general_url_path_chars]}*)*
         #{REGEXEN[:valid_url_path_ending_chars]}
-      )|(?:#{REGEXEN[:valid_general_url_path_chars]}+\/)
+      )|(?:@#{REGEXEN[:valid_general_url_path_chars]}+\/)
     )/iox
 
-    REGEXEN[:valid_url_query_chars] = /[a-z0-9!?\*'\(\);:&=\+\$\/%#\[\]\-_\.,~|@]/i
+    REGEXEN[:valid_url_query_chars] = /[a-z0-9!?\*'\(\);:&=\+\$\/%#\[\]\-_\.,~|]/i
     REGEXEN[:valid_url_query_ending_chars] = /[a-z0-9_&=#\/]/i
     REGEXEN[:valid_url] = %r{
       (                                                                                     #   $1 total match
@@ -252,7 +245,7 @@ module Twitter
     }iox;
 
     REGEXEN[:cashtag] = /[a-z]{1,6}(?:[._][a-z]{1,2})?/i
-    REGEXEN[:valid_cashtag] = /(^|#{REGEXEN[:spaces]})(\$)(#{REGEXEN[:cashtag]})(?=$|\s|[#{PUNCTUATION_CHARS}])/i
+    REGEXEN[:valid_cashtag] = /(?:^|#{REGEXEN[:spaces]})\$(#{REGEXEN[:cashtag]})(?=$|\s|[#{PUNCTUATION_CHARS}])/i
 
     # These URL validation pattern strings are based on the ABNF from RFC 3986
     REGEXEN[:validate_url_unreserved] = /[a-z0-9\-._~]/i
@@ -348,8 +341,6 @@ module Twitter
         \#(.*)                         #  $5 Fragment
       )?\Z
     }ix
-
-    REGEXEN[:rtl_chars] = /[#{RTL_CHARACTERS}]/io
 
     REGEXEN.each_pair{|k,v| v.freeze }
 

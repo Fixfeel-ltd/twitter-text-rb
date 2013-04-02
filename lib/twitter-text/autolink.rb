@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
 require 'set'
-require 'twitter-text/core_ext/hash'
 
 module Twitter
   # A module for including Tweet auto-linking in a class. The primary use of this is for helpers/views so they can auto-link
@@ -17,13 +16,13 @@ module Twitter
     DEFAULT_CASHTAG_CLASS = "tweet-url cashtag".freeze
 
     # Default URL base for auto-linked usernames
-    DEFAULT_USERNAME_URL_BASE = "https://twitter.com/".freeze
+    DEFAULT_USERNAME_URL_BASE = "http://fixfeel.com/users/".freeze
     # Default URL base for auto-linked lists
-    DEFAULT_LIST_URL_BASE = "https://twitter.com/".freeze
+    DEFAULT_LIST_URL_BASE = "http://fixfeel.com/".freeze
     # Default URL base for auto-linked hashtags
-    DEFAULT_HASHTAG_URL_BASE = "https://twitter.com/#!/search?q=%23".freeze
+    DEFAULT_HASHTAG_URL_BASE = "http://fixfeel.com/microposts?utf8=%E2%9C%93&q%5Bkeywords_cont%5D=".freeze
     # Default URL base for auto-linked cashtags
-    DEFAULT_CASHTAG_URL_BASE = "https://twitter.com/#!/search?q=%24".freeze
+    DEFAULT_CASHTAG_URL_BASE = "http://fixfeel.com/microposts?utf8=%E2%9C%93&q%5Bkeywords_cont%5D=".freeze
 
     # Default attributes for invisible span tag
     DEFAULT_INVISIBLE_TAG_ATTRS = "style='position:absolute;left:-9999px;'".freeze
@@ -208,7 +207,7 @@ module Twitter
     OPTIONS_NOT_ATTRIBUTES = Set.new([
       :url_class, :list_class, :username_class, :hashtag_class, :cashtag_class,
       :username_url_base, :list_url_base, :hashtag_url_base, :cashtag_url_base,
-      :username_url_block, :list_url_block, :hashtag_url_block, :cashtag_url_block, :link_url_block,
+      :username_url_block, :list_url_block, :hashtag_url_block, :link_url_block,
       :username_include_symbol, :suppress_lists, :suppress_no_follow, :url_entities,
       :invisible_tag_attrs, :symbol_tag, :text_with_symbol_tag, :url_target,
       :link_attribute_block, :link_text_block
@@ -327,11 +326,6 @@ module Twitter
       hash = chars[entity[:indices].first]
       hashtag = entity[:hashtag]
       hashtag = yield(hashtag) if block_given?
-      hashtag_class = options[:hashtag_class]
-
-      if hashtag.match Twitter::Regex::REGEXEN[:rtl_chars]
-        hashtag_class += ' rtl'
-      end
 
       href = if options[:hashtag_url_block]
         options[:hashtag_url_block].call(hashtag)
@@ -340,10 +334,9 @@ module Twitter
       end
 
       html_attrs = {
-        :class => hashtag_class,
+        :class => "#{options[:hashtag_class]}"
         # FIXME As our conformance test, hash in title should be half-width,
         # this should be bug of conformance data.
-        :title => "##{hashtag}"
       }.merge(options[:html_attrs])
 
       link_to_text_with_symbol(entity, hash, hashtag, href, html_attrs, options)
@@ -356,16 +349,9 @@ module Twitter
 
       href = if options[:cashtag_url_block]
         options[:cashtag_url_block].call(cashtag)
-      else
-        "#{options[:cashtag_url_base]}#{cashtag}"
       end
 
-      html_attrs = {
-        :class => "#{options[:cashtag_class]}",
-        :title => "$#{cashtag}"
-      }.merge(options[:html_attrs])
-
-      link_to_text_with_symbol(entity, dollar, cashtag, href, html_attrs, options)
+     link_to_text_with_symbol(entity, dollar, cashtag, href, options)
     end
 
     def link_to_screen_name(entity, chars, options = {})
@@ -391,7 +377,10 @@ module Twitter
         else
           "#{options[:username_url_base]}#{name}"
         end
-        html_attrs[:class] ||= "#{options[:username_class]}"
+		html_attrs = {
+        :class => "#{options[:username_class]}"
+      }.merge(options[:html_attrs])
+		
       end
 
       link_to_text_with_symbol(entity, at, chunk, href, html_attrs, options)
@@ -401,11 +390,7 @@ module Twitter
       tagged_symbol = options[:symbol_tag] ? "<#{options[:symbol_tag]}>#{symbol}</#{options[:symbol_tag]}>" : symbol
       text = html_escape(text)
       tagged_text = options[:text_with_symbol_tag] ? "<#{options[:text_with_symbol_tag]}>#{text}</#{options[:text_with_symbol_tag]}>" : text
-      if options[:username_include_symbol] || symbol !~ Twitter::Regex::REGEXEN[:at_signs]
-        "#{link_to_text(entity, tagged_symbol + tagged_text, href, attributes, options)}"
-      else
-        "#{tagged_symbol}#{link_to_text(entity, tagged_text, href, attributes, options)}"
-      end
+      "#{link_to_text(entity, tagged_symbol + tagged_text, href, attributes, options)}"
     end
 
     def link_to_text(entity, text, href, attributes = {}, options = {})
@@ -438,6 +423,5 @@ module Twitter
         attrs
       end
     end
-
   end
 end

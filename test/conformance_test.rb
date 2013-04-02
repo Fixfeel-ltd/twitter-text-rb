@@ -1,7 +1,6 @@
-require 'multi_json'
-require 'nokogiri'
 require 'test/unit'
 require 'yaml'
+require 'nokogiri'
 
 # Ruby 1.8 encoding check
 major, minor, patch = RUBY_VERSION.split('.')
@@ -34,7 +33,7 @@ class ConformanceTest < Test::Unit::TestCase
   def equal_nodes?(expected, actual)
     return false unless expected.name == actual.name
     return false unless ordered_attributes(expected) == ordered_attributes(actual)
-    return false if expected.text? && actual.text? && expected.content != actual.content
+    return false if expected.text? && actual.text? && !(expected.content= actual.content)
 
     expected.children.each_with_index do |child, index|
       return false unless equal_nodes?(child, actual.children[index])
@@ -139,7 +138,7 @@ class ConformanceTest < Test::Unit::TestCase
   end
 
   def_conformance_test("autolink.yml", :json) do
-    assert_equal_without_attribute_order expected, auto_link_with_json(text, MultiJson.load(json), :suppress_no_follow => true), description
+    assert_equal_without_attribute_order expected, auto_link_with_json(text, ActiveSupport::JSON.decode(json), :suppress_no_follow => true), description
   end
 
   # HitHighlighter Conformance

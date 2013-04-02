@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "twitter-text"
-  s.version = "1.6.1"
+  s.version = "1.5.0"
   s.authors = ["Matt Sanford", "Patrick Ewing", "Ben Cherry", "Britt Selvitelle",
-               "Raffi Krikorian", "J.P. Cummins", "Yoshimasa Niwa", "Keita Fujii", "James Koval"]
+               "Raffi Krikorian", "J.P. Cummins", "Yoshimasa Niwa", "Keita Fujii"]
   s.email = ["matt@twitter.com", "patrick.henry.ewing@gmail.com", "bcherry@gmail.com", "bs@brittspace.com",
-             "raffi@twitter.com", "jcummins@twitter.com", "niw@niw.at", "keita@twitter.com", "jkoval@twitter.com"]
+             "raffi@twitter.com", "jcummins@twitter.com", "niw@niw.at", "keita@twitter.com"]
   s.homepage = "http://twitter.com"
   s.description = s.summary = "A gem that provides text handling for Twitter"
 
@@ -14,13 +14,12 @@ Gem::Specification.new do |s|
   s.has_rdoc = true
   s.summary = "Twitter text handling library"
 
-  s.add_development_dependency "multi_json", "~> 1.3"
   s.add_development_dependency "nokogiri"
   s.add_development_dependency "rake"
   s.add_development_dependency "rdoc"
   s.add_development_dependency "rspec"
   s.add_development_dependency "simplecov"
-  s.add_runtime_dependency     "unf", "~> 0.1.0"
+  s.add_runtime_dependency "activesupport"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
